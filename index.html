@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School Management System</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Favicon browser -->
+  <link rel="icon" href="assets/logo.png" type="image/png"> <!-- <--https://drive.google.com/file/d/1rgY10JZosQKavOAV4kbz84YDVbENllHo/view?usp=drive_link -->
+
+  <!-- Manifest PWA -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <!-- Register Service Worker -->
+  <script>
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('service-worker.js')
+      .then(()=> console.log('Service Worker registered'))
+      .catch(err=> console.log('Service Worker failed', err));
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Background Lego -->
+  <div id="legoBackground"></div>
+
+  <!-- Loading Screen -->
+  <div id="loadingScreen">
+    <div class="logo">
+      <img src="assets/logo.png" alt="Our Logo"> <!-- <--https://drive.google.com/file/d/1rgY10JZosQKavOAV4kbz84YDVbENllHo/view?usp=drive_link-->
+    </div>
+    <div class="loader"></div>
+  </div>
+
+  <!-- Sign Up Form -->
+  <div class="form-container" id="signupForm">
+    <form>
+      <h2>Sign Up</h2>
+      <input type="text" placeholder="Nama Sekolah" id="signupSchool" required>
+      <input type="text" placeholder="Code" id="signupCode" required>
+      <input type="password" placeholder="Password" id="signupPassword" required>
+      <button type="submit">Sign Up</button>
+      <div class="switch-btn" onclick="switchForm('loginForm')">Already have account? Log In</div>
+    </form>
+  </div>
+
+  <!-- Log In Form -->
+  <div class="form-container" id="loginForm">
+    <form>
+      <h2>Log In</h2>
+      <input type="text" placeholder="Code" id="loginCode" required>
+      <input type="password" placeholder="Password" id="loginPassword" required>
+      <button type="submit">Log In</button>
+      <div class="switch-btn" onclick="switchForm('signupForm')">Don't have account? Sign Up</div>
+    </form>
+  </div>
+
+  <!-- Role Selection -->
+  <div class="form-container" id="roleSelection">
+    <h2>Pilih Role</h2>
+    <button onclick="selectRole('Pengawas')">Pengawas</button>
+    <button onclick="selectRole('GuruBiasa')">Guru Biasa</button>
+    <button onclick="selectRole('GuruKelas')">Guru Kelas</button>
+    <button onclick="selectRole('GuruDisiplin')">Guru Disiplin</button>
+    <button onclick="selectRole('Pentadbir')">Pentadbir</button>
+  </div>
+
+  <!-- Scanner + Backup IC -->
+  <div class="form-container" id="scannerContainer">
+    <h2>Scanner Pelajar</h2>
+    <button onclick="scanStudent()">Scan Pelajar</button>
+    <p>Atau masukkan nombor IC (backup):</p>
+    <input type="text" id="backupIC" placeholder="Nombor IC">
+    <button onclick="confirmIC()">Confirm IC</button>
+  </div>
+
+  <!-- Student Profile -->
+  <div class="form-container" id="studentProfile">
+    <h2>Profil Pelajar</h2>
+    <div class="student-info">
+      <p>Nama: <span id="studentName"></span></p>
+      <p>Kelas: <span id="studentClass"></span></p>
+      <p>No. IC: <span id="studentIC"></span></p>
+    </div>
+    <textarea id="studentViolation" placeholder="Isi kesalahan..."></textarea>
+    <button onclick="submitViolation()">Confirm Kesalahan</button>
+  </div>
+
+  <!-- Script JS + Firebase -->
+  <script>
+    // ===============================
+    // Firebase config 
+    // ===============================
+    const firebaseConfig = {
+      apiKey: "AIzaSyA8KlEVnvOYYcvZ1ET27BN-SiABP-4_A00",
+      authDomain: "e-discipline-44486.firebaseapp.com",
+      projectId: "e-discipline-44486",
+      storageBucket: "e-discipline-44486.firebasestorage.app",
+      messagingSenderId: "304449597658",
+      appId: "1:304449597658:web:cbdadd79f19383d2d2b5e3",
+      measurementId: "G-L13Z9GGCFV"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Loading screen
+    window.addEventListener('load', () => {
+      setTimeout(()=>{
+        document.getElementById('loadingScreen').classList.add('hidden');
+        document.getElementById('signupForm').classList.add('active');
+      }, 2000);
+    });
+
+    // Switch form
+    function switchForm(formId) {
+      document.querySelectorAll('.form-container').forEach(f=>f.classList.remove('active'));
+      document.getElementById(formId).classList.add('active');
+    }
+
+    // Sign Up
+    document.querySelector('#signupForm form').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const school = document.getElementById('signupSchool').value;
+      const code = document.getElementById('signupCode').value;
+      const password = document.getElementById('signupPassword').value;
+
+      try {
+        await db.collection('users').doc(code).set({ school, code, password });
+        alert('Sign Up berjaya!');
+        switchForm('roleSelection');
+      } catch(err){
+        console.error(err);
+        alert('Error Sign Up');
+      }
+    });
+
+    // Log In
+    document.querySelector('#loginForm form').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const code = document.getElementById('loginCode').value;
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        const doc = await db.collection('users').doc(code).get();
+        if(doc.exists){
+          const data = doc.data();
+          if(data.password === password){
+            switchForm('roleSelection');
+          } else { alert('Password salah!'); }
+        } else { alert('Code tidak ditemui!'); }
+      } catch(err){
+        console.error(err);
+        alert('Error Log In');
+      }
+    });
+
+    // Role selection
+    let currentRole = '';
+    function selectRole(role){
+      currentRole = role;
+      if(role === 'Pengawas'){
+        const password = prompt('Masukkan password pengawas:');
+        if(password !== '1234'){ alert('Password salah!'); return; } // <-- Tukar password pengawas
+      }
+      switchForm('scannerContainer');
+    }
+
+    // ===============================
+    // Firestore student search by IC
+    // ===============================
+    let currentStudent = null;
+
+    async function getStudentByIC(ic){
+      const snapshot = await db.collection('students').where('ic', '==', ic).get();
+      if(snapshot.empty){ alert('Pelajar tidak ditemui!'); return null; }
+      return snapshot.docs[0].data();
+    }
+
+    async function confirmIC(){
+      const ic = document.getElementById('backupIC').value;
+      const student = await getStudentByIC(ic);
+      if(student){ currentStudent = student; showStudentProfile(student); }
+    }
+
+    function showStudentProfile(student){
+      document.getElementById('studentName').innerText = student.name;
+      document.getElementById('studentClass').innerText = student.class;
+      document.getElementById('studentIC').innerText = student.ic;
+      switchForm('studentProfile');
+    }
+
+    function scanStudent(){
+      alert('Scan function boleh implement ikut hardware / scanner awak');
+    }
+
+    // Submit violation to Firestore
+    function submitViolation(){
+      const violation = document.getElementById('studentViolation').value;
+      if(!violation){ alert('Sila isi kesalahan!'); return; }
+
+      const now = new Date();
+      const record = {
+        studentIC: currentStudent.ic,
+        studentName: currentStudent.name,
+        studentClass: currentStudent.class,
+        violation,
+        recordedBy: currentRole,
+        timestamp: now.toISOString()
+      };
+
+      db.collection('violations').add(record)
+        .then(()=> {
+          alert('Kesalahan disimpan di Firebase!');
+          document.getElementById('studentViolation').value='';
+          document.getElementById('backupIC').value='';
+          switchForm('scannerContainer');
+        })
+        .catch(err=> { console.error(err); alert('Error simpan kesalahan'); });
+    }
+
+  </script>
+
+</body>
+</html>
