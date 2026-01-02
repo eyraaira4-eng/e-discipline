@@ -1,0 +1,21 @@
+{
+  "name": "E-Discipline System",          // <-- 
+  "short_name": "E-Discipline",          // <-- 
+  "start_url": "index.html",             // <-- 
+  "display": "standalone",
+  "background_color": "soft yellow",         // <--
+  "theme_color": "soft yellow",              // <-- 
+  "icons": [
+    {
+      "src": "assets/logo.png",          // <-- https://drive.google.com/file/d/16Q1-Q0tkKb5_U8JpzFnwc7t72rUDiert/view?usp=drive_link(192x192)
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/logo.png",          // <-- https://drive.google.com/file/d/16Q1-Q0tkKb5_U8JpzFnwc7t72rUDiert/view?usp=drive_link(512x512)
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
