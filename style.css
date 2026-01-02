@@ -1,0 +1,120 @@
+/* ===============================
+   General Body / Background
+   =============================== */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  height: 100%;
+  overflow: hidden;
+  background-color: #f0f0f0;
+}
+
+/* ===============================
+   Background Lego / Animasi
+   =============================== */
+#legoBackground {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://https://drive.google.com/file/d/1Q1LFvFqoJIPURsPXJh5gq_yv9AI3eTPr/view?usp=drive_link); /* <-- Tukar link background */
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+}
+
+/* ===============================
+   Loading Screen
+   =============================== */
+#loadingScreen {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 10;
+  transition: opacity 0.5s ease;
+}
+#loadingScreen.hidden { opacity: 0; pointer-events: none; }
+
+.logo img { width: 150px; } /* <-- Tukar link logo di HTML */
+
+.loader {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  margin-top: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* ===============================
+   Forms & Containers
+   =============================== */
+.form-container { 
+  display: none; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center; 
+  height: 100%; 
+}
+.form-container.active { display: flex; }
+
+form, #roleSelection, #scannerContainer, #studentProfile, #dashboard {
+  background: rgba(255,255,255,0.95);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  width: 350px;
+  text-align: center;
+  margin: 10px;
+}
+
+form input, #scannerContainer input, #studentProfile input, #studentProfile textarea {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+form button, #scannerContainer button, #studentProfile button {
+  padding: 10px 20px;
+  border: none;
+  background: #3498db;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.switch-btn {
+  margin-top: 10px;
+  color: #3498db;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 0.9rem;
+}
+
+/* ===============================
+   Student Info Styling
+   =============================== */
+.student-info, .student-info p { 
+  margin: 5px 0; 
+}
+
+textarea#studentViolation {
+  width: 90%;
+  height: 100px;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  resize: none;
+}
